@@ -1,0 +1,8 @@
+flask
+flask-cors
+torch>=1.7.0
+ultralytics
+vietocr
+Pillow
+numpy
+requests

@@ -1,0 +1,21 @@
+# Configuration file for training YOLOv5 on Ultralytics HUB
+
+# Path to the dataset
+path: ./dataset  # This folder should contain 'images' and 'labels' subfolders for train/val sets
+
+# Train and validation datasets
+train: images/train  # Path to training images (relative to the `path`)
+val: images/train      # Path to validation images (relative to the `path`)
+
+# Number of classes in the dataset
+nc: 7  # Update with the number of classes in your dataset
+
+# Class names (one name per line, in order)
+names:
+  - v1
+  - v2
+  - v3
+  - v4
+  - v5
+  - v6
+  - v7
