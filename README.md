@@ -1,7 +1,3 @@
-Here is the updated `README.md` file, reflecting the removal of PaddleOCR and the integration of YOLOv5 and VietOCR:
-
----
-
 # Water Meter OCR Application
 
 This project is an advanced OCR (Optical Character Recognition) application designed to extract water meter values from images. It combines the power of YOLOv5 for field detection and VietOCR for character recognition, with a Next.js front end and a Flask back end.
