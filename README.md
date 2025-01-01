@@ -8,6 +8,8 @@ This project is an advanced OCR (Optical Character Recognition) application desi
 - Handles missing values gracefully, logging debug messages for any undetected fields.
 - Simple front-end interface for file input and visualization of extracted results.
 
+---
+
 ## 2. Technologies Used
 - **Next.js**: Framework for the front end.
 - **Flask**: Python framework for the back end.
@@ -15,6 +17,8 @@ This project is an advanced OCR (Optical Character Recognition) application desi
 - **VietOCR**: Model for text recognition.
 - **Axios**: HTTP client for communication between Next.js and Flask.
 - **Vercel**: Deployment platform for the Next.js front end.
+
+---
 
 ## 3. File Structure
 ```
@@ -50,9 +54,9 @@ water-meter-ocr/
 │   ├── config.yaml/         # YOLO config
 │   ├── classes.txt/        
 │   ├── convert_json_to_txt.py
-
-
 ```
+
+---
 
 ## 4. Installation and Setup
 ### Prerequisites
@@ -124,6 +128,8 @@ water-meter-ocr/
 3. Click "Extract Data" to get the OCR results.
 4. View extracted values for each field, labeled as `v1` to `v7`.
 
+---
+
 ## 5. Model Configuration
 ### **YOLOv11L:**  
 #### a. Configuration:  
@@ -173,7 +179,12 @@ Each detected field is labeled as `v1` to `v7` (e.g., `v1` for the first field, 
 ### **VietOCR Configuration**
 - **Model**: `vgg_transformer.pth`
 - **Use**: Recognizes text in cropped fields detected by YOLO.
-- **Training**: Fine-tuned on water meter datasets for better accuracy.
+- **Training**: Fine-tuned on water meter datasets for better accuracy.   
+
+**Usage:** Cloning into VietOCR by:
+```
+git clone https://github.com/pbcquoc/vietocr.git
+```
 
 ---
 
