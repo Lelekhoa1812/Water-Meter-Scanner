@@ -2,30 +2,32 @@
 
 This project is an advanced OCR (Optical Character Recognition) application designed to extract water meter values from images. It combines the power of YOLOv5 for field detection and VietOCR for character recognition, with a Next.js front end and a Flask back end.
 
-## Features
+## 1. Features
 - Detects specific fields in water meter images using YOLOv5 (`yolov11l.pt` model).
 - Extracts and recognizes text from each detected field using VietOCR (`vgg_transformer.pth` model).
 - Handles missing values gracefully, logging debug messages for any undetected fields.
 - Simple front-end interface for file input and visualization of extracted results.
 
-## Technologies Used
+## 2. Technologies Used
 - **Next.js**: Framework for the front end.
 - **Flask**: Python framework for the back end.
-- **YOLOv5**: Model for field detection.
+- **YOLO**: Models v11l and v5xu for field detection.
 - **VietOCR**: Model for text recognition.
 - **Axios**: HTTP client for communication between Next.js and Flask.
 - **Vercel**: Deployment platform for the Next.js front end.
 
-## File Structure
+## 3. File Structure
 ```
 water-meter-ocr/
 ├── flask-server/            # Flask-based YOLO & VietOCR API server
 │   ├── app.py               # Flask application file
 │   ├── models/              # Folder containing YOLO and VietOCR models
-│   │   ├── yolov11l.pt      # YOLO model for field detection
+│   │   ├── yolov11l.pt      # YOLOv11l model for field detection
+│   │   ├── yolov5xu.pt      # YOLOv5xu model for field detection
 │   │   └── vgg_transformer.pth # VietOCR model for text recognition
 │   ├── requirements.txt     # Python dependencies for the server
-│   └── static/              # Optional folder for any static assets (e.g., test images)
+│   └── static/              # Optional folder for any static assets (e.g., test images, temporary images)
+│   └── vietocr/                 # Clone into VietOCR for utilities
 ├── nextjs-client/           # Next.js frontend application
 │   ├── pages/
 │   │   ├── api/
@@ -52,8 +54,7 @@ water-meter-ocr/
 
 ```
 
-## Installation and Setup
-
+## 4. Installation and Setup
 ### Prerequisites
 - Python 3.8+ installed for the Flask server.
 - Node.js and npm installed for the Next.js client.
@@ -123,17 +124,11 @@ water-meter-ocr/
 3. Click "Extract Data" to get the OCR results.
 4. View extracted values for each field, labeled as `v1` to `v7`.
 
-## Model Configuration
-
-### **YOLOv5 Configuration**
-#### a. Training Parameters
-
-
-
+## 5. Model Configuration
 ### **YOLOv11L:**  
 #### a. Configuration:  
 ```yaml
-batch: 32                 # Specific batch size
+batch: -1                 # Specific batch size
 cache: "ram"              # Use RAM for caching
 device: "gpu"      
 epochs: 300               # Train for more epochs
@@ -148,9 +143,30 @@ weights: "yolov11l.pt"    # Start with pretrained weights
 #### b. Model Evaluation:  
 <img src="imgsrc/YOLOv11l.png" alt="YOLO v11 Large Model Evaluation" style="width: 70%; max-width: 1000px;">    
 
+### **YOLOv5xu:**  
+#### a. Configuration:  
+```yaml
+batch: 32                 # Specific batch size
+cache: "ram"              # Use RAM for caching
+device: "gpu"      
+epochs: 300               # Train for more epochs
+imgsize: 640              
+patience: 100
+lr0: 0.001                # Learning rate for stability
+optimizer: "AdamW"        # Use AdamW optimizer
+augment: True             # Enable advanced augmentations
+weights: "yolov5xu.pt"    # Start with pretrained weights
+```
 
-#### c. Field Detection Output
-Each detected field is labeled as `v1` to `v7` (e.g., `v1` for the first field, `v2` for the second, and so on).
+#### b. Model Evaluation:  
+<img src="imgsrc/YOLOv5xu.png" alt="YOLO v5 Ultra Model Evaluation" style="width: 70%; max-width: 1000px;">    
+
+**Notation on choice of model:** Ultralytics YOLOv5u series is an advanced version of YOLOv5, integrating the anchor-free, objectness-free split head that enhances the accuracy-speed tradeoff for real-time object detection tasks. Unlike the traditional YOLOv5, YOLOv5u adopts an anchor-free detection mechanism, making it more flexible and adaptive in diverse scenarios.  
+
+### Field Detection Output
+Each detected field is labeled as `v1` to `v7` (e.g., `v1` for the first field, `v2` for the second, and so on).  
+
+<img src="imgsrc/field_detection_example.png" alt="Example of field detection from input image" style="width: 70%; max-width: 1000px;">
 
 ---
 

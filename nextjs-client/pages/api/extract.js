@@ -46,6 +46,8 @@ export default async function handler(req, res) {
           .map((value, index) => (value === 'X' ? `v${index + 1}` : null)) // Identify missing fields
           .filter((v) => v !== null), // Filter out null values
       });
+
+    // Catch error when processing image
     } catch (error) {
       console.error('Error processing image:', error);
       res.status(500).json({ message: 'Failed to process the image.' });
