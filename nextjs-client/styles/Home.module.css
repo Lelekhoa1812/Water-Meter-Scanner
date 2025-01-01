@@ -2,7 +2,7 @@
   position: relative;
   font-family: Arial, sans-serif;
   text-align: center;
-  background: linear-gradient(to bottom, #0077be, #004080);
+  /* background: linear-gradient(to bottom, #0077be, #004080); */
   color: #ffffff;
   min-height: 100vh;
   display: flex;
@@ -12,13 +12,25 @@
   overflow: hidden;
 }
 
-.canvas {
+.background {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
+  background: url('/imgsrc/water-effect.gif') no-repeat center center;
+  background-size: cover;
+  animation: waterFlow 5s linear infinite;
+}
+
+@keyframes waterFlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
 }
 
 .overlay {

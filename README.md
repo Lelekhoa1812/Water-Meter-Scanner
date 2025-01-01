@@ -8,6 +8,9 @@ This project is an advanced OCR (Optical Character Recognition) application desi
 - Handles missing values gracefully, logging debug messages for any undetected fields.
 - Simple front-end interface for file input and visualization of extracted results.
 
+Front-end interface:  
+<img src="imgsrc/interface.png" alt="UI" style="width: 80%; max-width: 1000px;"> 
+
 ---
 
 ## 2. Technologies Used
