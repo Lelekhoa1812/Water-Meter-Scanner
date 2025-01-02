@@ -2,6 +2,8 @@
 
 This project is an advanced OCR (Optical Character Recognition) application designed to extract water meter values from images. It combines the power of YOLOv5 for field detection and VietOCR for character recognition, with a Next.js front end and a Flask back end.
 
+Dành cho người dùng với ngôn ngữ tiếng Việt xem tại [đây](https://github.com/Lelekhoa1812/Water-Meter-Scanner/blob/main/README-vi.md)  
+
 ## 1. Features
 - Preprocessing image with gray scaling and CLAHE techniques.
 - Detects specific fields in water meter images using YOLOv5 (`yolov11xu.pt` model) and YOLOv11 (`yolov11l.pt` model).
