@@ -21,6 +21,7 @@ Front-end interface:
 - **VietOCR**: Model for text recognition.
 - **Axios**: HTTP client for communication between Next.js and Flask.
 - **Vercel**: Deployment platform for the Next.js front end.
+- **Render**: Deployment platform for the Flash API back end.
 
 ---
 
