@@ -60,7 +60,6 @@ Quy trình dự án:
 ---
 Here is the translated section of the README into Vietnamese for your `README-vi.md` file:
 
-```markdown
 ## 5. Cài Đặt và Thiết Lập
 ### Yêu Cầu Trước
 - Python 3.8+ được cài đặt cho server Flask.
