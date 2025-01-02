@@ -65,7 +65,7 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch OCR data.');
+        throw new Error('Failed to fetch OCR data');
       }
 
       const data = await response.json();
