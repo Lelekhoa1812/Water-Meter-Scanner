@@ -6,3 +6,5 @@ flask-server/models/vgg_transformer.pth
 flask-server/.gitignore
 # Ignore key file
 flask-server/key
+# Ignore test script
+flask-server/app2.py

@@ -13,14 +13,14 @@ from io import BytesIO
 import os
 import numpy as np
 import traceback
-
-# For local deployment
-# from vietocr.tool.predictor import Predictor
-# from vietocr.tool.config import Cfg
 import cv2
+from vietocr.tool.predictor import Predictor
+from vietocr.tool.config import Cfg
 
 # For remote deployment
 from google.cloud import vision
+from google.auth.transport.requests import AuthorizedSession
+from google.oauth2.service_account import Credentials
 
 # Flask application setup
 app = Flask(__name__)
@@ -34,28 +34,77 @@ HUB_API_KEY = "11d01d0022bc555c5206abe2ee3587b5ad5e85b66e" # Contact for API key
 # Use this model for better accuracy
 HUB_MODEL_URL = "https://hub.ultralytics.com/models/P7NNTwolndJ4wZR9bhQW" # YOLOv11l model
 
-# Google Cloud Vision configuration
-# Load Google Cloud credentials from environment variable
+
+#### Download VietOCR model from GCS with authentication processes to predict with preset parameters for better accuracy
+# Paths and configurations
+MODEL_DIR = "./models"
+MODEL_NAME = "vgg_transformer.pth"
+MODEL_PATH = os.path.join(MODEL_DIR, MODEL_NAME)
+# GCS API Key
+MODEL_URL = "https://storage.googleapis.com/water-meter-ocr-models/vgg_transformer.pth"
 TEXT_API_KEY_JSON = os.getenv("GCLOUD_SERVICE_ACCOUNT_KEY")
 # If not found JSON
 if not TEXT_API_KEY_JSON:
     raise ValueError("Google Cloud service account key not found in environment variables")
 # Write the key to a temporary file
-temp_key_path = "/tmp/service_account_key.json"
-with open(temp_key_path, "w") as key_file:
+SERVICE_ACCOUNT_KEY_PATH = "/tmp/service_account_key.json"
+with open(SERVICE_ACCOUNT_KEY_PATH, "w") as key_file:
     key_file.write(TEXT_API_KEY_JSON)
 # Set the environment variable for Google Cloud API authentication
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_key_path
-# Initialize Google Vision API client
-client = vision.ImageAnnotatorClient()
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_KEY_PATH
+# Direct usage when deploying locally with key file (must be commented)
+# SERVICE_ACCOUNT_KEY_PATH = "key/water-meter-446604-9eb9b40f5f9d.json"  # Path to your service account JSON key
+# Download model from Google Cloud Service
+def download_model_from_gcs_authenticated(url, local_path, service_account_key_path):
+    """
+    Downloads a file from GCS with authentication.
 
-# # VietOCR model setup
-# vietocr_config = Cfg.load_config_from_name('vgg_transformer')
-# vietocr_config['weights'] = './models/vgg_transformer.pth'
-# vietocr_config['device'] = 'cpu'  # Use 'cuda' for GPU if available
-# vietocr_config['predictor']['beamsearch'] = False
-# vietocr = Predictor(vietocr_config)
+    Args:
+        url (str): GCS URL to the file.
+        local_path (str): Local path to save the downloaded file.
+        service_account_key_path (str): Path to the service account JSON key file.
 
+    Raises:
+        Exception: If an error occurs during the download process.
+    """
+    try:
+        print(f"Authenticating with GCS and downloading model from {url}...")
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+        # Authenticate using the service account key with appropriate scopes
+        SCOPES = ["https://www.googleapis.com/auth/devstorage.read_only"]
+        credentials = Credentials.from_service_account_file(service_account_key_path, scopes=SCOPES)
+        authed_session = AuthorizedSession(credentials)
+        # Perform the authenticated request
+        response = authed_session.get(url, stream=True)
+        # Check status when download and write the file
+        if response.status_code == 200:
+            with open(local_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"Model downloaded successfully to {local_path}.")
+        else:
+            raise Exception(f"Failed to download model: {response.status_code}, {response.reason}")
+    except Exception as e:
+        app.logger.error(f"Error downloading model from GCS: {e}")
+        raise
+# Validate model file integrity
+def validate_model_file(file_path):
+    if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+        raise ValueError(f"Model file at {file_path} is corrupted or incomplete.")
+# Setup VietOCR model
+def setup_vietocr_model(model_path):
+    config = Cfg.load_config_from_name('vgg_transformer')
+    config['weights'] = model_path
+    config['device'] = 'cpu'
+    config['predictor']['beamsearch'] = False
+    return Predictor(config)
+# Ensure the model is available locally
+if not os.path.exists(MODEL_PATH):
+    download_model_from_gcs_authenticated(MODEL_URL, MODEL_PATH, SERVICE_ACCOUNT_KEY_PATH)
+validate_model_file(MODEL_PATH)
+# Call setup
+vietocr = setup_vietocr_model(MODEL_PATH)
+####
 
 # Apply preprocess steps to improve prediction under edge case constraints
 def preprocess_image(pil_img):
@@ -219,13 +268,12 @@ def recognize_text(cropped_img):
     """
     # Mapping detecting alphabetic chars to numeric (add more if found or adjust if needed)
     char_map = {
-        'S': '5',
-        'D': '0',
-        'O': '0',
+        'S': '5', 's': '5',
+        'D': '0', 'O': '0',
         'Z': '2',
         'B': '8',
-        'g': '9',
-        'I': '1',
+        'g': '9', 'G': '6',
+        'I': '1', 'l': '1',
         'A': '4',
         'Q': '0',
         'T': '1', # These mapping from here should be check and tested 
@@ -237,29 +285,11 @@ def recognize_text(cropped_img):
     print(f"Text recognition in progress...")
 
     try:
-        ##### Local deployment
-        # # Ensure input is a PIL.Image object
-        # if not isinstance(cropped_img, Image.Image):  # Check if not a PIL.Image
-        #     cropped_img = Image.fromarray(np.array(cropped_img))  # Convert back to PIL.Image if necessary
-        # # Run OCR using VietOCR
-        # raw_text = vietocr.predict(cropped_img)
-        #### 
-
-        #### Render Cloud deployment 
-        # Convert PIL.Image to byte array
-        img_byte_array = BytesIO()
-        cropped_img.save(img_byte_array, format="JPEG")
-        img_byte_array = img_byte_array.getvalue()
-        # Use Google Cloud Vision API
-        image = vision.Image(content=img_byte_array)
-        response = client.text_detection(image=image)
-        # Validate GV API
-        if response.error.message:
-            app.logger.error(f"Google Vision API error: {response.error.message}")
-            return "ERROR"
-        # Extract
-        raw_text = response.text_annotations[0].description.strip() if response.text_annotations else ""
-        ####
+        # Ensure input is a PIL.Image object
+        if not isinstance(cropped_img, Image.Image):  # Check if not a PIL.Image
+            cropped_img = Image.fromarray(np.array(cropped_img))  # Convert back to PIL.Image if necessary
+        # Run OCR using VietOCR
+        raw_text = vietocr.predict(cropped_img)
 
         # Convert characters based on the mapping
         converted_text = ""

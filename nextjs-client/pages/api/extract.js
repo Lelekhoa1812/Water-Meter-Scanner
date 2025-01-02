@@ -39,6 +39,9 @@ export default async function handler(req, res) {
         if (value === 'X') {
           console.error(`Error, cannot find value for field v${index + 1} in image ${fileName}.`);
         }
+        if (index === 0) {
+          value = 0; // Initial value usually 0 so match its exception
+        }
       });
 
       return res.status(200).json({
