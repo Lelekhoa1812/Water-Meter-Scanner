@@ -83,7 +83,8 @@ export default function Home() {
     <>
       <Head>
         <title>Water Meter OCR</title>
-        <link rel="icon" href="/imgsrc/logo.png" />
+        <link rel="website icon" type="png" href="imgsrc/logo.png" />
+
       </Head>
       <div className={styles.container}>
         <div className={styles.background}></div>
