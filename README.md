@@ -232,5 +232,4 @@ The current website UI is hosted on Vercel [Water Meter](https://water-meter-sca
 
 ---
 
-Latest commit on 02/01/2025
-Author: Dang Khoa Le
+Latest commit on 02/01/2025 | Author: Dang Khoa Le
