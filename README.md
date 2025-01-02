@@ -61,7 +61,7 @@ water-meter-ocr/
 
 ---
 
-## 4. File Structure  
+## 4. Project Pipelines
 Project Pipeline:  
 <img src="imgsrc/pipeline.png" alt="Overall Pipeline" style="width: 80%; max-width: 1000px;">  
 
