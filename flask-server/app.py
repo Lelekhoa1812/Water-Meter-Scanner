@@ -13,6 +13,8 @@ import numpy as np
 import traceback
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
+import cv2
+
 
 # Flask application setup
 app = Flask(__name__)
@@ -20,8 +22,11 @@ CORS(app)  # Enable CORS for cross-origin requests
 
 # Ultralytics HUB API configuration prefixes
 HUB_API_URL = "https://predict.ultralytics.com"
-HUB_API_KEY = "" # Contact for API key
-HUB_MODEL_URL = "https://hub.ultralytics.com/models/9MXNttLcuHXX2yFUN6Ym"
+HUB_API_KEY = "11d01d0022bc555c5206abe2ee3587b5ad5e85b66e" # Contact for API key
+# Use this model for easier version compatibility and deployment (as at 01/01/2025)
+# HUB_MODEL_URL = "https://hub.ultralytics.com/models/9MXNttLcuHXX2yFUN6Ym" # YOLOv5xu model
+# Use this model for better accuracy
+HUB_MODEL_URL = "https://hub.ultralytics.com/models/P7NNTwolndJ4wZR9bhQW" # YOLOv11l model
 
 # VietOCR model setup
 vietocr_config = Cfg.load_config_from_name('vgg_transformer')
@@ -29,6 +34,38 @@ vietocr_config['weights'] = './models/vgg_transformer.pth'
 vietocr_config['device'] = 'cpu'  # Use 'cuda' for GPU if available
 vietocr_config['predictor']['beamsearch'] = False
 vietocr = Predictor(vietocr_config)
+
+
+# Apply preprocess steps to improve prediction under edge case constraints
+def preprocess_image(pil_img):
+    """
+    Preprocesses the input PIL image:
+    - Converts to grayscale
+    - Applies CLAHE (Contrast Limited Adaptive Histogram Equalization) for brightness normalization
+    - Resizes the image if necessary
+
+    Args:
+        pil_img (PIL.Image): Input image.
+
+    Returns:
+        PIL.Image: Preprocessed image.
+    """
+    try:
+        print("Preprocessing image in progress...")
+        # Convert PIL image to OpenCV format
+        img = np.array(pil_img)
+        img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+        # Apply CLAHE
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        img_clahe = clahe.apply(img_gray)
+
+        # Convert back to PIL.Image
+        return Image.fromarray(img_clahe)
+    except Exception as e:
+        app.logger.error(f"Error during preprocessing: {e}")
+        return pil_img  # Return original image if preprocessing fails
+
 
 @app.route('/ocr', methods=['POST'])
 def ocr_process():
@@ -58,6 +95,12 @@ def ocr_process():
             img = Image.open(BytesIO(response.content))
             app.logger.info(f"Image format: {img.format}, Size: {img.size}, Mode: {img.mode}")
             print((f"Image format: {img.format}, Size: {img.size}, Mode: {img.mode}"))
+        
+        '''
+        Preprocess the image (CLAHE and normalization)
+        This may compute upto 5s preprocessing the image under brightness uncertainties
+        '''
+        img = preprocess_image(img) # Remove to reduce runtime but also reduce prediction coverages
 
         # Convert input img to RGB if necessary
         if img.mode != "RGB":
@@ -88,11 +131,11 @@ def ocr_process():
         # Print debugs to check for response status and error
         print(f"Request sent to Ultralytics HUB: {response.url}")
         print(f"Status code: {response.status_code}")
-        print(f"Response headers: {response.headers}")
-        #  Try and catch error with the query's response body
+        # print(f"Response headers: {response.headers}")
+        # Try and catch error with the query's response body
         try:
             response.raise_for_status()
-            print(f"Response JSON: {response.json()}")
+            # print(f"Response JSON: {response.json()}")
         except requests.exceptions.RequestException as e:
             print(f"Error in API request: {e}")
             print(f"Response content: {response.content}")
@@ -118,6 +161,9 @@ def ocr_process():
             x_min, y_min, x_max, y_max = box["x1"], box["y1"], box["x2"], box["y2"]
             field_name = f"v{int(cls) + 1}"  # Map class index to field name (v1 to v7)
 
+            # Tracing which field has been detected
+            print(f"v{int(cls) + 1} has value")
+
             # Crop the field and recognize text
             cropped_img = img.crop((x_min, y_min, x_max, y_max))
             fields[field_name] = recognize_text(cropped_img)
@@ -127,7 +173,7 @@ def ocr_process():
             os.remove(temp_image_path)
         else:
             print(f"Temporary image {temp_image_path} was already deleted or not found.")
-
+        print("--FIN-SESSION--") # Finish a session
         return jsonify({'fields': fields})
 
     except requests.exceptions.RequestException as e:
@@ -150,6 +196,7 @@ def recognize_text(cropped_img):
     Returns:
         str: Converted numeric text or "ERROR" if invalid characters are found.
     """
+    # Mapping detecting alphabetic chars to numeric (add more if found or adjust if needed)
     char_map = {
         'S': '5',
         'D': '0',
@@ -157,8 +204,16 @@ def recognize_text(cropped_img):
         'Z': '2',
         'B': '8',
         'g': '9',
-        'I': '1'
+        'I': '1',
+        'A': '4',
+        'Q': '0',
+        'T': '1', # These mapping from here should be check and tested 
+        'E': '3',
+        'a': '0',
+        'C': '0',
     }
+    # Debugging step
+    print(f"Text recognition in progress...")
 
     try:
         # Ensure input is a PIL.Image object
@@ -174,7 +229,7 @@ def recognize_text(cropped_img):
             if char.isdigit():
                 converted_text += char  # Keep numeric characters
             elif char in char_map:
-                converted_text += char_map[char]  # Map alphabetic characters to numbers
+                converted_text += char_map[char] # Map alphabetic characters to numbers
             else:
                 app.logger.error(f"Invalid character detected: {char}")
                 return "ERROR"  # Flag as error if invalid character is found
@@ -187,3 +242,4 @@ def recognize_text(cropped_img):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)
+    print("--END-SESSION--") # Terminate all session

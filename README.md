@@ -61,7 +61,13 @@ water-meter-ocr/
 
 ---
 
-## 4. Installation and Setup
+## 4. File Structure  
+Project Pipeline:  
+<img src="imgsrc/pipeline.png" alt="Overall Pipeline" style="width: 80%; max-width: 1000px;">  
+
+---
+
+## 5. Installation and Setup
 ### Prerequisites
 - Python 3.8+ installed for the Flask server.
 - Node.js and npm installed for the Next.js client.
@@ -133,7 +139,7 @@ water-meter-ocr/
 
 ---
 
-## 5. Model Configuration
+## 6. Model Configuration
 ### **YOLOv11L:**  
 #### a. Configuration:  
 ```yaml
