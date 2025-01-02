@@ -225,3 +225,11 @@ UI Detection Output:
 If any field is undetected, an empty string (`""`) is returned for that field, and an error message is logged.
 
 ---
+
+## Hosting and Deployments
+The current website UI is hosted on Vercel [Water Meter](https://water-meter-scanner.vercel.app/) and Flask API server hosted on Render [Copy URL](https://watermeterflask.onrender.com).
+
+---
+
+Latest commit on 02/01/2025
+Author: Dang Khoa Le

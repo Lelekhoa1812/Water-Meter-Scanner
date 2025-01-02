@@ -1,0 +1,12 @@
+flask
+flask-cors
+requests
+pillow
+numpy
+# vietocr @ git+https://github.com/pbcquoc/vietocr.git
+torch
+torchvision
+ultralytics
+gunicorn
+google-cloud-vision
+opencv-python-headless

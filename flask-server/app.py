@@ -1,6 +1,8 @@
 # CURL command for direct post query on either local path or remote URL
 # curl -X POST -H "Content-Type: application/json" -d '{"imageUrl":"/Users/khoale/Downloads/water-meter-ocr/flask-server/static/testimg1.jpg"}' http://localhost:5001/ocr
 # curl -X POST -H "Content-Type: application/json" -d '{"imageUrl":"http://115.79.125.119:8081/donghonuoc/uploads/19112024101437.jpg"}' http://localhost:5001/ocr
+# For Render deployment:
+# curl -X POST -H "Content-Type: application/json" -d '{"imageUrl":"http://115.79.125.119:8081/donghonuoc/uploads/19112024101437.jpg"}' https://watermeterflask.onrender.com/ocr
 
 import json
 import requests
@@ -11,10 +13,14 @@ from io import BytesIO
 import os
 import numpy as np
 import traceback
-from vietocr.tool.predictor import Predictor
-from vietocr.tool.config import Cfg
+
+# For local deployment
+# from vietocr.tool.predictor import Predictor
+# from vietocr.tool.config import Cfg
 import cv2
 
+# For remote deployment
+from google.cloud import vision
 
 # Flask application setup
 app = Flask(__name__)
@@ -22,18 +28,33 @@ CORS(app)  # Enable CORS for cross-origin requests
 
 # Ultralytics HUB API configuration prefixes
 HUB_API_URL = "https://predict.ultralytics.com"
-HUB_API_KEY = "" # Contact for API key
+HUB_API_KEY = "11d01d0022bc555c5206abe2ee3587b5ad5e85b66e" # Contact for API key
 # Use this model for easier version compatibility and deployment (as at 01/01/2025)
 # HUB_MODEL_URL = "https://hub.ultralytics.com/models/9MXNttLcuHXX2yFUN6Ym" # YOLOv5xu model
 # Use this model for better accuracy
 HUB_MODEL_URL = "https://hub.ultralytics.com/models/P7NNTwolndJ4wZR9bhQW" # YOLOv11l model
 
-# VietOCR model setup
-vietocr_config = Cfg.load_config_from_name('vgg_transformer')
-vietocr_config['weights'] = './models/vgg_transformer.pth'
-vietocr_config['device'] = 'cpu'  # Use 'cuda' for GPU if available
-vietocr_config['predictor']['beamsearch'] = False
-vietocr = Predictor(vietocr_config)
+# Google Cloud Vision configuration
+# Load Google Cloud credentials from environment variable
+TEXT_API_KEY_JSON = os.getenv("GCLOUD_SERVICE_ACCOUNT_KEY")
+# If not found JSON
+if not TEXT_API_KEY_JSON:
+    raise ValueError("Google Cloud service account key not found in environment variables")
+# Write the key to a temporary file
+temp_key_path = "/tmp/service_account_key.json"
+with open(temp_key_path, "w") as key_file:
+    key_file.write(TEXT_API_KEY_JSON)
+# Set the environment variable for Google Cloud API authentication
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_key_path
+# Initialize Google Vision API client
+client = vision.ImageAnnotatorClient()
+
+# # VietOCR model setup
+# vietocr_config = Cfg.load_config_from_name('vgg_transformer')
+# vietocr_config['weights'] = './models/vgg_transformer.pth'
+# vietocr_config['device'] = 'cpu'  # Use 'cuda' for GPU if available
+# vietocr_config['predictor']['beamsearch'] = False
+# vietocr = Predictor(vietocr_config)
 
 
 # Apply preprocess steps to improve prediction under edge case constraints
@@ -216,12 +237,29 @@ def recognize_text(cropped_img):
     print(f"Text recognition in progress...")
 
     try:
-        # Ensure input is a PIL.Image object
-        if not isinstance(cropped_img, Image.Image):  # Check if not a PIL.Image
-            cropped_img = Image.fromarray(np.array(cropped_img))  # Convert back to PIL.Image if necessary
+        ##### Local deployment
+        # # Ensure input is a PIL.Image object
+        # if not isinstance(cropped_img, Image.Image):  # Check if not a PIL.Image
+        #     cropped_img = Image.fromarray(np.array(cropped_img))  # Convert back to PIL.Image if necessary
+        # # Run OCR using VietOCR
+        # raw_text = vietocr.predict(cropped_img)
+        #### 
 
-        # Run OCR using VietOCR
-        raw_text = vietocr.predict(cropped_img)
+        #### Render Cloud deployment 
+        # Convert PIL.Image to byte array
+        img_byte_array = BytesIO()
+        cropped_img.save(img_byte_array, format="JPEG")
+        img_byte_array = img_byte_array.getvalue()
+        # Use Google Cloud Vision API
+        image = vision.Image(content=img_byte_array)
+        response = client.text_detection(image=image)
+        # Validate GV API
+        if response.error.message:
+            app.logger.error(f"Google Vision API error: {response.error.message}")
+            return "ERROR"
+        # Extract
+        raw_text = response.text_annotations[0].description.strip() if response.text_annotations else ""
+        ####
 
         # Convert characters based on the mapping
         converted_text = ""
@@ -241,5 +279,6 @@ def recognize_text(cropped_img):
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+    port = int(os.environ.get("PORT", 5001))  # Default to 5001 if no PORT is provided
+    app.run(host='0.0.0.0', port=port)
     print("--END-SESSION--") # Terminate all session

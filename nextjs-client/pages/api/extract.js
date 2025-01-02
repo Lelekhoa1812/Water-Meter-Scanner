@@ -1,6 +1,8 @@
 // backend nextjs-client/pages/api/extract.js
 import axios from 'axios';
 
+const FLASK_API_URL = "https://watermeterflask.onrender.com/ocr"; // Replace with the actual Render service URL
+
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { fileName } = req.body;
@@ -14,8 +16,8 @@ export default async function handler(req, res) {
 
     try {
       // Send request to Flask API
-      console.log(`Sending request to Flask API: http://localhost:5001/ocr with imageUrl: ${fileUrl}`);
-      const response = await axios.post('http://localhost:5001/ocr', {
+      console.log(`Sending request to Flask API: ${FLASK_API_URL} with imageUrl: ${fileUrl}`);
+      const response = await axios.post(FLASK_API_URL, {
         imageUrl: fileUrl,
       });
 

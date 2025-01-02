@@ -1,8 +1,11 @@
 flask
 flask-cors
-torch>=1.7.0
-ultralytics
-vietocr @ git+https://github.com/pbcquoc/vietocr.git
-Pillow
-numpy==1.26.4
 requests
+pillow
+numpy
+vietocr @ git+https://github.com/pbcquoc/vietocr.git
+torch
+torchvision
+ultralytics
+gunicorn
+
