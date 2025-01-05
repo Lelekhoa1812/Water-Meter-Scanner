@@ -3,7 +3,6 @@ flask-server/venv/
 nextjs-client/node_modules/
 # Ignoring heavy weight files
 flask-server/models/vgg_transformer.pth
-flask-server/.gitignore
 # Ignore key files
 flask-server/key
 dataset/key
@@ -11,3 +10,5 @@ dataset/key
 flask-server/test.py
 # Ignore vietOCR as they can be cloned from GitHub to reduce storage
 flask-server/vietocr
+# Deny submodule creation when push as attempting to set Flask server as a regular folder
+flask-server/.git
