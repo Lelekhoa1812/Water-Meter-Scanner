@@ -30,7 +30,7 @@ CORS(app)  # Enable CORS for cross-origin requests
 
 # Ultralytics HUB API configuration prefixes
 HUB_API_URL = "https://predict.ultralytics.com"
-HUB_API_KEY = "11d01d0022bc555c5206abe2ee3587b5ad5e85b66e" # Contact for API key
+HUB_API_KEY = "" # Contact for API key
 # Use this model for easier version compatibility and deployment (as at 01/01/2025)
 # HUB_MODEL_URL = "https://hub.ultralytics.com/models/9MXNttLcuHXX2yFUN6Ym" # YOLOv5xu model
 # Use this model for better accuracy
