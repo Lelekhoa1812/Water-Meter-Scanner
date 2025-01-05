@@ -7,4 +7,6 @@ flask-server/.gitignore
 # Ignore key file
 flask-server/key
 # Ignore test script
-flask-server/app2.py
+flask-server/test.py
+# Ignore vietOCR as they can be cloned from GitHub to reduce storage
+flask-server/vietocr
