@@ -4,7 +4,7 @@ nextjs-client/node_modules/
 # Ignoring heavy weight files
 flask-server/models/vgg_transformer.pth
 flask-server/.gitignore
-# Ignore key file
+# Ignore key files
 flask-server/key
 dataset/key
 # Ignore test script
