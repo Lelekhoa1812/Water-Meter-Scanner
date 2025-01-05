@@ -1,0 +1,25 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Model files (if already downloaded on the server or unnecessary for the build context)
+*.pt
+*.pth
+
+# Datasets and training data (exclude if not required in the app)
+dataset/
+
+# Version control and keys
+.git/
+key/
+
+# Development-specific directories/files
+.env
+*.bak
+
+# Exclude VietOCR if already part of the deployment pipeline or unnecessary in the container
+vietocr/
