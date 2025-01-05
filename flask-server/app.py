@@ -3,6 +3,8 @@
 # curl -X POST -H "Content-Type: application/json" -d '{"imageUrl":"http://115.79.125.119:8081/donghonuoc/uploads/19112024101437.jpg"}' http://localhost:5001/ocr
 # For Render deployment:
 # curl -X POST -H "Content-Type: application/json" -d '{"imageUrl":"http://115.79.125.119:8081/donghonuoc/uploads/19112024101437.jpg"}' https://watermeterflask.onrender.com/ocr
+# For AWS deployment:
+# curl -X POST -H "Content-Type: application/json" -d '{"imageUrl":"http://115.79.125.119:8081/donghonuoc/uploads/19112024101437.jpg"}' http://ec2-34-224-214-23.compute-1.amazonaws.com:5000
 
 import json
 import requests
@@ -18,9 +20,9 @@ from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
 
 # For remote deployment
-from google.cloud import vision
-from google.auth.transport.requests import AuthorizedSession
-from google.oauth2.service_account import Credentials
+# from google.cloud import vision
+# from google.auth.transport.requests import AuthorizedSession
+# from google.oauth2.service_account import Credentials
 
 # Flask application setup
 app = Flask(__name__)
@@ -42,51 +44,52 @@ MODEL_NAME = "vgg_transformer.pth"
 MODEL_PATH = os.path.join(MODEL_DIR, MODEL_NAME)
 # GCS API Key
 MODEL_URL = "https://storage.googleapis.com/water-meter-ocr-models/vgg_transformer.pth"
-TEXT_API_KEY_JSON = os.getenv("GCLOUD_SERVICE_ACCOUNT_KEY")
-# If not found JSON
-if not TEXT_API_KEY_JSON:
-    raise ValueError("Google Cloud service account key not found in environment variables")
-# Write the key to a temporary file
-SERVICE_ACCOUNT_KEY_PATH = "/tmp/service_account_key.json"
-with open(SERVICE_ACCOUNT_KEY_PATH, "w") as key_file:
-    key_file.write(TEXT_API_KEY_JSON)
-# Set the environment variable for Google Cloud API authentication
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_KEY_PATH
+# TEXT_API_KEY_JSON = os.getenv("GCLOUD_SERVICE_ACCOUNT_KEY")
+# # If not found JSON
+# if not TEXT_API_KEY_JSON:
+#     raise ValueError("Google Cloud service account key not found in environment variables")
+# # Write the key to a temporary file
+# SERVICE_ACCOUNT_KEY_PATH = "/tmp/service_account_key.json"
+# with open(SERVICE_ACCOUNT_KEY_PATH, "w") as key_file:
+#     key_file.write(TEXT_API_KEY_JSON)
+# # Set the environment variable for Google Cloud API authentication
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_KEY_PATH
 # Direct usage when deploying locally with key file (must be commented)
 # SERVICE_ACCOUNT_KEY_PATH = "key/water-meter-446604-9eb9b40f5f9d.json"  # Path to your service account JSON key
+
 # Download model from Google Cloud Service
-def download_model_from_gcs_authenticated(url, local_path, service_account_key_path):
-    """
-    Downloads a file from GCS with authentication.
+# def download_model_from_gcs_authenticated(url, local_path, service_account_key_path):
+#     """
+#     Downloads a file from GCS with authentication.
 
-    Args:
-        url (str): GCS URL to the file.
-        local_path (str): Local path to save the downloaded file.
-        service_account_key_path (str): Path to the service account JSON key file.
+#     Args:
+#         url (str): GCS URL to the file.
+#         local_path (str): Local path to save the downloaded file.
+#         service_account_key_path (str): Path to the service account JSON key file.
 
-    Raises:
-        Exception: If an error occurs during the download process.
-    """
-    try:
-        print(f"Authenticating with GCS and downloading model from {url}...")
-        os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        # Authenticate using the service account key with appropriate scopes
-        SCOPES = ["https://www.googleapis.com/auth/devstorage.read_only"]
-        credentials = Credentials.from_service_account_file(service_account_key_path, scopes=SCOPES)
-        authed_session = AuthorizedSession(credentials)
-        # Perform the authenticated request
-        response = authed_session.get(url, stream=True)
-        # Check status when download and write the file
-        if response.status_code == 200:
-            with open(local_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            print(f"Model downloaded successfully to {local_path}.")
-        else:
-            raise Exception(f"Failed to download model: {response.status_code}, {response.reason}")
-    except Exception as e:
-        app.logger.error(f"Error downloading model from GCS: {e}")
-        raise
+#     Raises:
+#         Exception: If an error occurs during the download process.
+#     """
+#     try:
+#         print(f"Authenticating with GCS and downloading model from {url}...")
+#         os.makedirs(os.path.dirname(local_path), exist_ok=True)
+#         # Authenticate using the service account key with appropriate scopes
+#         SCOPES = ["https://www.googleapis.com/auth/devstorage.read_only"]
+#         credentials = Credentials.from_service_account_file(service_account_key_path, scopes=SCOPES)
+#         authed_session = AuthorizedSession(credentials)
+#         # Perform the authenticated request
+#         response = authed_session.get(url, stream=True)
+#         # Check status when download and write the file
+#         if response.status_code == 200:
+#             with open(local_path, 'wb') as f:
+#                 for chunk in response.iter_content(chunk_size=8192):
+#                     f.write(chunk)
+#             print(f"Model downloaded successfully to {local_path}.")
+#         else:
+#             raise Exception(f"Failed to download model: {response.status_code}, {response.reason}")
+#     except Exception as e:
+#         app.logger.error(f"Error downloading model from GCS: {e}")
+#         raise
 # Validate model file integrity
 def validate_model_file(file_path):
     if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
@@ -100,7 +103,8 @@ def setup_vietocr_model(model_path):
     return Predictor(config)
 # Ensure the model is available locally
 if not os.path.exists(MODEL_PATH):
-    download_model_from_gcs_authenticated(MODEL_URL, MODEL_PATH, SERVICE_ACCOUNT_KEY_PATH)
+    # download_model_from_gcs_authenticated(MODEL_URL, MODEL_PATH, SERVICE_ACCOUNT_KEY_PATH)
+    print("Error fetch model")
 validate_model_file(MODEL_PATH)
 # Call setup
 vietocr = setup_vietocr_model(MODEL_PATH)
@@ -173,8 +177,8 @@ def ocr_process():
         img = preprocess_image(img) # Remove to reduce runtime but also reduce prediction coverages
 
         # Convert input img to RGB if necessary
-        if img.mode != "RGB":
-            img = img.convert("RGB")
+        # if img.mode != "RGB":
+        #     img = img.convert("RGB")
 
         # Save the image temporarily for inference request
         temp_image_path = "static/temp_image.jpg"
@@ -309,6 +313,7 @@ def recognize_text(cropped_img):
     
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5001))  # Default to 5001 if no PORT is provided
+    # port = int(os.environ.get("PORT", 5001))  # Default to 5001 if no PORT is provided on local
+    port = int(os.environ.get("PORT", 5000))  # Default to 5000 for Flask app on VM deployment
     app.run(host='0.0.0.0', port=port)
     print("--END-SESSION--") # Terminate all session

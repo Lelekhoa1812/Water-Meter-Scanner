@@ -1,7 +1,10 @@
 // backend nextjs-client/pages/api/extract.js
 import axios from 'axios';
 
-const FLASK_API_URL = "https://watermeterflask.onrender.com/ocr"; // Replace with the actual Render service URL
+// const FLASK_API_URL = "https://watermeterflask.onrender.com/ocr"; // Render service URL
+// const FLASK_API_URL = "http://127.0.0.1:5001/ocr"
+
+const FLASK_API_URL = "http://ec2-34-224-214-23.compute-1.amazonaws.com:5000" // AWS service URL
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {

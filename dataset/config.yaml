@@ -5,7 +5,7 @@ path: ./dataset  # This folder should contain 'images' and 'labels' subfolders f
 
 # Train and validation datasets
 train: images/train  # Path to training images (relative to the `path`)
-val: images/train      # Path to validation images (relative to the `path`)
+val: images/train    # Path to validation images (relative to the `path`)
 
 # Number of classes in the dataset
 nc: 7  # Update with the number of classes in your dataset
