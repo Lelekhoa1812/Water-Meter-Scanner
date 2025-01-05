@@ -225,7 +225,7 @@ UI Detection Output:
 <img src="imgsrc/ui_output.png" alt="Detection completed" style="width: 70%; max-width: 1000px;">   
 
 ## Debugging
-If any field is undetected, an empty string (`""`) is returned for that field, and an error message is logged.
+If any field is undetected, or an unexpected output is extracted an error string (`X`) is returned for that field, and an error message is logged.
 
 ---
 

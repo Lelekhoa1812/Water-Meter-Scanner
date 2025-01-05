@@ -1,0 +1,6 @@
+# Ignore weight/model
+models/
+# Ignore key
+key/
+# Ignore test script
+test.py

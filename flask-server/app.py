@@ -301,12 +301,12 @@ def recognize_text(cropped_img):
                 converted_text += char_map[char] # Map alphabetic characters to numbers
             else:
                 app.logger.error(f"Invalid character detected: {char}")
-                return "ERROR"  # Flag as error if invalid character is found
+                return "X"  # Flag as error if invalid character is found
 
         return converted_text
     except Exception as e:
         app.logger.error(f"Error recognizing text: {e}")
-        return "ERROR"  # Return "ERROR" if recognition fails
+        return "X"  # Return "X" if recognition fails
     
 
 if __name__ == '__main__':
