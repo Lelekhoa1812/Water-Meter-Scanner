@@ -38,7 +38,7 @@ water-meter-ocr/
 │   │   └── vgg_transformer.pth # VietOCR model for text recognition
 │   ├── requirements.txt     # Python dependencies for the server
 │   └── static/              # Optional folder for any static assets (e.g., test images, temporary images)
-│   └── vietocr/                 # Clone into VietOCR for utilities
+│   └── vietocr/             # Clone into VietOCR for utilities
 ├── nextjs-client/           # Next.js frontend application
 │   ├── pages/
 │   │   ├── api/
@@ -232,6 +232,12 @@ If any field is undetected, an empty string (`""`) is returned for that field, a
 ## Hosting and Deployments
 The current website UI is hosted on Vercel [Water Meter](https://water-meter-scanner.vercel.app/) and Flask API server hosted on Render [Copy URL](https://watermeterflask.onrender.com).
 
+**Follow this Instruction** to deploy NextJS Frontend on [Vercel](https://github.com/Lelekhoa1812/Water-Meter-Scanner/blob/main/nextjs-client/INSTRUCTION-vercel.md).  
+
+**Follow this Instruction** to deploy Flask Server on [AWS](https://github.com/Lelekhoa1812/Water-Meter-Scanner/blob/main/flask-server/INSTRUCTION-aws.md).  
+
+**Follow this Instruction** to deploy Flask Server on [Jetson Nano Server](https://github.com/Lelekhoa1812/Water-Meter-Scanner/blob/main/flask-server/INSTRUCTION-jetson-nano.md).  
+
 ---
 
-Latest commit on 02/01/2025 | Author: Dang Khoa Le
+Latest commit on 05/01/2025 | Author: Dang Khoa Le

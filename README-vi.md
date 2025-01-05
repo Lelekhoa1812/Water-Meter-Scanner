@@ -223,6 +223,12 @@ Với nhãn bị thiếu, sẽ được lưu là (`""`) và log tin báo lỗi.
 ## Hosting and Deployments
 Giao diện Vercel [Water Meter](https://water-meter-scanner.vercel.app/) server Flask API server trên Render [Sao chép URL](https://watermeterflask.onrender.com).
 
+**Xem hướng dẫn** cách triển khai NextJS Frontend trên [Vercel](https://github.com/Lelekhoa1812/Water-Meter-Scanner/blob/main/nextjs-client/INSTRUCTION-vercel.md).  
+
+**Xem hướng dẫn** cách triển khai Flask Server trên [AWS](https://github.com/Lelekhoa1812/Water-Meter-Scanner/blob/main/flask-server/INSTRUCTION-aws.md).  
+
+**Xem hướng dẫn** cách triển khai Flask Server trên [Jetson Nano Server](https://github.com/Lelekhoa1812/Water-Meter-Scanner/blob/main/flask-server/INSTRUCTION-jetson-nano.md).  
+
 ---
 
-Latest commit on 02/01/2025 | Author: Dang Khoa Le
+Latest commit on 05/01/2025 | Author: Dang Khoa Le
